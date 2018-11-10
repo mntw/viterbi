@@ -1,5 +1,5 @@
-# viterbi
-viterbi algorithm
+# Viterbi
+Viterbi algorithm
 
 
 
