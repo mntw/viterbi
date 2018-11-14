@@ -15,9 +15,10 @@ def splitBy2(seq):
 
 def encode(seq):
     FSM = [('00', {'0' : ('00', 0), '1' : ('11', 1)}),
-       ('10', {'0' : ('10', 3), '1' : ('01', 2)}),
-       ('11', {'0' : ('01', 1), '1' : ('10', 2)}),
-       ('01', {'0' : ('11', 0), '1' : ('00', 1)})]
+           ('10', {'0' : ('10', 3), '1' : ('01', 2)}),
+           ('11', {'0' : ('01', 1), '1' : ('10', 2)}),
+           ('01', {'0' : ('11', 0), '1' : ('00', 1)})
+           ]
     curState = 0 
     output = ''
 
@@ -29,6 +30,33 @@ def encode(seq):
     print("coder output: %s" % output)
     return output
 
+class FSMDecode:
+    def __init__(self, seq):
+        self.state = 0
+        self.score = 0
+        self.statesHistory = ''
+        self.output = ''
+        self.fsmStoped = False
+        self.seq = seq
+        self.seqGenerator = self.getSeqGen(seq)
+        self.fsm = [('00', {'00' : ('0', 0),'11' : ('1', 1)}),
+                    ('10', {'10' : ('0', 3), '01' : ('1', 2)}),
+                    ('11', {'01' : ('0', 1), '10' : ('1', 2)}),
+                    ('01', {'11' : ('0', 0), '00' : ('1', 1)})]
+        def getSeqGen(self, seq):
+            return (seq[i:i+2] for i in range(0, len(seq), 2)) # generator which will yield every 2 digits from seq
+        def getSeq(self):
+            try:
+                return next(self.seqGenerator)
+            except StopIteration:
+                return None
+        def findNearest(self):
+            statesFork = self.fsm[self.state][1].keys()
+
+
+
+
+
 def decode(seq):    
     FSM = [('00', {'00' : ('0', 0),'11' : ('1', 1)}),
 	   ('10', {'10' : ('0', 3), '01' : ('1', 2)}),
@@ -36,6 +64,7 @@ def decode(seq):
 	   ('01', {'11' : ('0', 0), '00' : ('1', 1)})]
 
     seq = splitBy2(seq)
+    # Create list of possible binary combinations with 2 len(seq)
     combo = [''.join(i) for i in list(itertools.product('01', repeat=(len(seq) * 2) ))]
     total = []
 
@@ -51,11 +80,13 @@ def decode(seq):
                 states += FSM[curState][0]
                 curState = FSM[curState][1].get(p)[1]
                 score += distance(p, s)
-
             total.append([score, Out, j, states])
         except Exception:
             continue
     total.sort()
+    for i in total:
+        print i
+    print total[0]
     return total
 
 
@@ -79,9 +110,12 @@ def plot(total):
 def viterbi(seq, error_vector):
     output = encode(seq)
     corruptedVec = corrupt(output, error_vector)
+    print 'corrupted vector: ', corruptedVec
     total = decode(corruptedVec)
     plot(total)
 
 
 if __name__ == "__main__":
-    viterbi(seq='1100011', error_vector='000000000100')
+    errVec = '00000010010000'
+    seq='1100011'
+    viterbi(seq=seq, error_vector=errVec)
